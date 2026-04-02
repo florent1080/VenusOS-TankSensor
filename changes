@@ -1,0 +1,9 @@
+v1.0:
+  - Initial release
+  - ADS1115 I2C ADC support (raw ioctl, no smbus dependency)
+  - Resistive tank sender support (configurable R_EMPTY / R_FULL)
+  - Voltage divider calculation with configurable R_REF
+  - Sliding average smoothing
+  - Simulation mode (--simulate) for testing without hardware
+  - SetupHelper compatible (install/uninstall/reinstall)
+  - Configurable via /data/dbus-tank-ads1115/tank-sensor.conf

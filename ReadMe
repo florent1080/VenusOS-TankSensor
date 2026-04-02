@@ -1,0 +1,25 @@
+VenusOS-TankSensor — DIY Tank Level Sensor for Venus OS
+
+Uses an ADS1115 16-bit I2C ADC to read a resistive tank sender
+(e.g. Osculati 10-180 ohm) and publish the tank level on D-Bus.
+
+The tank appears in Venus OS GUI (v1 and v2), Remote Console, and VRM.
+
+Hardware required:
+  - ADS1115 breakout board (I2C, ~4 EUR)
+  - Resistive tank sender (10-180 ohm European standard)
+  - 100 ohm reference resistor
+  - 4 wires to RPi GPIO (3.3V, GND, SDA, SCL)
+
+Configuration:
+  Edit /data/dbus-tank-ads1115/tank-sensor.conf after installation.
+
+Testing without hardware:
+  1. The service starts in --simulate mode by default
+  2. Run: python3 /data/dbus-tank-ads1115/test_tank_sim.py 50
+     to set the tank level to 50%
+  3. Or: python3 /data/dbus-tank-ads1115/test_tank_sim.py ramp
+     for automatic 0-100-0 cycling
+
+Switching to real hardware:
+  Edit services/dbus-tank-ads1115/run and remove --simulate flag.

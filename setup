@@ -1,0 +1,83 @@
+#!/bin/bash
+
+# VenusOS-TankSensor setup script
+# DIY ADS1115 tank level sensor integration for Venus OS
+#
+# This script installs/uninstalls:
+#   - D-Bus tank service (dbus-tank-ads1115)
+#   - ADS1115 I2C driver module
+#   - Test simulator script
+#   - Default config file (preserves existing)
+
+packageDir="$(dirname "$(realpath "$0")")"
+
+#### following line incorporates helper resources into this script
+source "/data/SetupHelper/HelperResources/IncludeHelpers"
+#### end of lines to include helper resources
+
+#### running manually and target just install or uninstall
+if [ $scriptAction == 'NONE' ] ; then
+    echo
+    echo "This package adds DIY ADS1115 tank level sensor support to Venus OS"
+    echo
+    scriptAction=$(promptForAction)
+fi
+
+if [ $scriptAction == 'INSTALL' ] ; then
+    logMessage "installing VenusOS-TankSensor"
+
+    # Create target directory
+    mkdir -p /data/dbus-tank-ads1115
+
+    # Install Python scripts
+    cp "$packageDir/dbus-tank-ads1115.py" /data/dbus-tank-ads1115/
+    cp "$packageDir/ads1115.py" /data/dbus-tank-ads1115/
+    cp "$packageDir/test_tank_sim.py" /data/dbus-tank-ads1115/
+    chmod +x /data/dbus-tank-ads1115/dbus-tank-ads1115.py
+    chmod +x /data/dbus-tank-ads1115/test_tank_sim.py
+    logMessage "Python scripts installed"
+
+    # Fix line endings (CRLF → LF) in case files were edited on Windows
+    for f in /data/dbus-tank-ads1115/*.py; do
+        sed -i 's/\r//g' "$f"
+    done
+    logMessage "line endings fixed"
+
+    # Install config file (only if not already present — preserve user edits)
+    if [ ! -f /data/dbus-tank-ads1115/tank-sensor.conf ] ; then
+        cp "$packageDir/tank-sensor.conf" /data/dbus-tank-ads1115/tank-sensor.conf
+        sed -i 's/\r//g' /data/dbus-tank-ads1115/tank-sensor.conf
+        logMessage "default config installed"
+    else
+        logMessage "config file already exists, preserved"
+    fi
+
+    # Verify I2C is available
+    if [ -e /dev/i2c-1 ]; then
+        logMessage "I2C bus /dev/i2c-1 available"
+    else
+        logMessage "WARNING: /dev/i2c-1 not found — I2C may not be enabled"
+        logMessage "Add dtparam=i2c_arm=on to /u-boot/config.txt and reboot"
+    fi
+
+fi
+
+if [ $scriptAction == 'UNINSTALL' ] ; then
+    logMessage "uninstalling VenusOS-TankSensor"
+
+    # Remove Python scripts (but preserve config)
+    rm -f /data/dbus-tank-ads1115/dbus-tank-ads1115.py
+    rm -f /data/dbus-tank-ads1115/ads1115.py
+    rm -f /data/dbus-tank-ads1115/test_tank_sim.py
+    logMessage "Python scripts removed"
+
+    # Note: tank-sensor.conf is NOT removed (user data)
+    logMessage "config file preserved (/data/dbus-tank-ads1115/tank-sensor.conf)"
+
+    # Clean up simulation file
+    rm -f /tmp/tank-sim-level
+fi
+
+# Let SetupHelper handle:
+#   INSTALL_SERVICES — installs dbus-tank-ads1115 runit service
+endScript INSTALL_SERVICES
