@@ -1,3 +1,8 @@
+v1.1:
+  - Real I2C mode enabled by default (--simulate removed from service)
+  - Calibration comments added in tank-sensor.conf (Osculati 27.161.15 sensor)
+  - R_FULL=180 ohm, R_EMPTY=10 ohm (validated on hardware, April 2026)
+
 v1.0:
   - Initial release
   - ADS1115 I2C ADC support (raw ioctl, no smbus dependency)
